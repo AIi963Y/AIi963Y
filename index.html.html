@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator and Checker Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            background-image: linear-gradient(45deg, #00ff00 25%, #ffff00 25%, #ffff00 50%, #00ff00 50%, #00ff00 75%, #ffff00 75%, #ffff00 100%);
+            background-size: 56.57px 56.57px;
+            animation: backgroundAnimation 1s linear infinite;
+        }
+        @keyframes backgroundAnimation {
+            0% { background-position: 0 0; }
+            100% { background-position: 56.57px 56.57px; }
+        }
+        .container {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            text-align: center;
+            overflow: hidden;
+            margin-top: 100px; /* Move the container down */
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .start-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .stop-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            height: 200px;
+            overflow-y: scroll;
+            text-align: left;
+        }
+        .video-container {
+            margin-top: 20px;
+        }
+        .email-box {
+            margin-top: 20px;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            max-height: 0;
+        }
+        .email-box.open {
+            max-height: 500px;
+        }
+        .email-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .email-password {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .email-password span {
+            display: inline-block;
+            width: 30%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Password Generator and Checker Tool</h2>
+        <button class="button" onclick="toggleEmailBox()">Enter Emails</button>
+        <div class="email-box" id="email-box">
+            <div style="height: 300px; overflow-y: auto;">
+                <input type="text" class="email-input" placeholder="Enter Email 1">
+                <input type="text" class="email-input" placeholder="Enter Email 2">
+                <input type="text" class="email-input" placeholder="Enter Email 3">
+                <input type="text" class="email-input" placeholder="Enter Email 4">
+                <input type="text" class="email-input" placeholder="Enter Email 5">
+                <input type="text" class="email-input" placeholder="Enter Email 6">
+                <input type="text" class="email-input" placeholder="Enter Email 7">
+                <input type="text" class="email-input" placeholder="Enter Email 8">
+                <input type="text" class="email-input" placeholder="Enter Email 9">
+                <input type="text" class="email-input" placeholder="Enter Email 10">
+                <input type="text" class="email-input" placeholder="Enter Email 11">
+                <input type="text" class="email-input" placeholder="Enter Email 12">
+                <input type="text" class="email-input" placeholder="Enter Email 13">
+                <input type="text" class="email-input" placeholder="Enter Email 14">
+                <input type="text" class="email-input" placeholder="Enter Email 15">
+                <input type="text" class="email-input" placeholder="Enter Email 16">
+                <input type="text" class="email-input" placeholder="Enter Email 17">
+                <input type="text" class="email-input" placeholder="Enter Email 18">
+                <input type="text" class="email-input" placeholder="Enter Email 19">
+                <input type="text" class="email-input" placeholder="Enter Email 20">
+            </div>
+            <button class="button" onclick="toggleEmailBox()">Close</button>
+        </div>
+        <textarea id="password-script" placeholder="Enter your password script here" style="width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;"></textarea>
+        <label><input type="checkbox" id="use-ai"> Use AI for password generation</label>
+        <label><input type="checkbox" id="use-script"> Use custom script</label>
+        <label><input type="checkbox" id="use-file"> Use password file</label>
+        <input type="file" id="password-file" style="display: none;" onchange="loadFile(event)">
+        <button class="button start-button" onclick="startChecking()">Start Checking</button>
+        <button class="button stop-button" onclick="stopChecking()">Stop Checking</button>
+        <div class="result" id="result">Result: </div>
+    </div>
+
+    <script>
+        let running = false;
+        let correctPasswords = ["password1", "password2", "password3", "password4", "password5"]; // Example correct passwords
+        let platforms = ["Google", "Facebook", "YouTube", "TikTok"]; // Example platforms
+        let passwordSet = new Set();
+
+        function generatePassword() {
+            const length = 12;
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return password;
+        }
+
+        function startChecking() {
+            running = true;
+            document.getElementById('result').innerText = 'Checking...';
+            checkPasswords();
+        }
+
+        function stopChecking() {
+            running = false;
+            document.getElementById('result').innerText = 'Stopped';
+        }
+
+        function checkPasswords() {
+            if (!running) return;
+            const emails = document.querySelectorAll('.email-input');
+            const resultDiv = document.getElementById('result');
+            const useAI = document.getElementById('use-ai').checked;
+            const useScript = document.getElementById('use-script').checked;
+            const useFile = document.getElementById('use-file').checked;
+            let password = generatePassword();
+            if (useScript) {
+                const script = document.getElementById('password-script').value;
+                if (script) {
+                    password = script;
+                }
+            }
+            if (useFile) {
+                const filePasswords = Array.from(passwordSet);
+                if (filePasswords.length > 0) {
+                    password = filePasswords.shift();
+                    passwordSet.delete(password);
+                }
+            }
+            emails.forEach(email => {
+                const emailValue = email.value;
+                if (emailValue) {
+                    if (correctPasswords.includes(password)) {
+                        const platform = platforms[Math.floor(Math.random() * platforms.length)];
+                        resultDiv.innerHTML = `<div class="email-password" style="color: green;"><span>${emailValue}</span><span>${password}</span><span>${platform}</span></div>` + resultDiv.innerHTML;
+                        email.value = ''; // Clear the email field
+                    } else {
+                        resultDiv.innerHTML = `<div class="email-password" style="color: red;"><span>${emailValue}</span><span>${password}</span><span>Incorrect</span></div>` + resultDiv.innerHTML;
+                    }
+                }
+            });
+            if (running) {
+                setTimeout(checkPasswords, 100); // Adjust the delay as needed
+            }
+        }
+
+        function loadFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                lines.forEach(line => {
+                    passwordSet.add(line.trim());
+                });
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleEmailBox() {
+            const emailBox = document.getElementById('email-box');
+            emailBox.classList.toggle('open');
+        }
+
+        document.getElementById('use-file').addEventListener('change', function() {
+            const fileInput = document.getElementById('password-file');
+            if (this.checked) {
+                fileInput.style.display = 'block';
+            } else {
+                fileInput.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
